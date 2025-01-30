@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Control Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Orbitron', sans-serif; }
+        .glow-text { text-shadow: 0 0 10px #facc15, 0 0 20px #facc15; }
+        .fade-in { animation: fadeIn 1s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-black text-white">
+    <div id="app"></div>
+
+    <script type="text/babel">
+        function Dashboard() {
+            const [time, setTime] = React.useState(new Date().toLocaleTimeString());
+            const [coolingPressure, setCoolingPressure] = React.useState(5.8);
+            const [freshWater, setFreshWater] = React.useState(5.03);
+
+            // Update waktu setiap detik
+            React.useEffect(() => {
+                const interval = setInterval(() => {
+                    setTime(new Date().toLocaleTimeString());
+                }, 1000);
+                return () => clearInterval(interval);
+            }, []);
+
+            // Render UI
+            return (
+                <div className="p-4">
+                    {/* HEADER */}
+                    <div className="flex justify-between items-center bg-gray-800 p-3 rounded-md shadow-lg fade-in">
+                        <div className="text-lg font-bold text-yellow-400 glow-text">PROCESS CONTROL DASHBOARD</div>
+                        <div className="text-sm text-gray-300">{time}</div>
+                    </div>
+
+                    {/* SYSTEM OVERVIEW */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                        <InfoCard title="Cooling Water Pressure" value={`${coolingPressure} bar`} color="blue" />
+                        <InfoCard title="Fresh Water Pressure" value={`${freshWater} bar`} color="green" />
+                        <InfoCard title="Air Compressor Pressure" value="5.8 bar" color="yellow" />
+                        <InfoCard title="Fresh Water Level" value="94.9%" color="purple" />
+                    </div>
+
+                    {/* SYSTEM STATUS */}
+                    <div className="bg-gray-900 p-4 mt-4 rounded-lg shadow-xl fade-in">
+                        <div className="text-center text-yellow-500 font-bold text-xl glow-text">SYSTEM STATUS</div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                            <StatusCard title="Refiner" status="Running" />
+                            <StatusCard title="Stock Proportioning" status="Stable" />
+                            <StatusCard title="Dry Broke Tower" status="41%" />
+                            <StatusCard title="Wet Broke Tower" status="37%" />
+                            <StatusCard title="Cleaner Plant" status="Active" />
+                            <StatusCard title="Quality Control" status="Monitoring" />
+                        </div>
+                    </div>
+
+                    {/* GRAPHICAL DATA */}
+                    <div className="bg-gray-900 p-4 mt-4 rounded-lg shadow-xl fade-in">
+                        <canvas id="pressureChart"></canvas>
+                    </div>
+                </div>
+            );
+        }
+
+        function InfoCard({ title, value, color }) {
+            return (
+                <div className={`bg-${color}-700 p-4 rounded-md shadow-md text-white text-center`}>
+                    <div className="text-sm">{title}</div>
+                    <div className="text-lg font-bold">{value}</div>
+                </div>
+            );
+        }
+
+        function StatusCard({ title, status }) {
+            return (
+                <div className="bg-gray-800 p-4 rounded-md shadow-md text-center">
+                    <div className="text-green-400">{title}</div>
+                    <div className="text-yellow-300 font-bold">{status}</div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<Dashboard />, document.getElementById("app"));
+
+        // CHART.JS FOR GRAPH
+        setTimeout(() => {
+            const ctx = document.getElementById('pressureChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'],
+                    datasets: [{
+                        label: 'Pressure Over Time',
+                        data: [5.8, 5.9, 5.7, 5.6, 5.8, 6.0],
+                        borderColor: '#facc15',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: false }
+                    }
+                }
+            });
+        }, 500);
+    </script>
+</body>
+</html>
